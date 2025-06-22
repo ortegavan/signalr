@@ -50,8 +50,3 @@ app.MapHub<MessageHub>("/messageHub");
 app.MapGet("/health", () => new { Status = "Healthy", Timestamp = DateTime.UtcNow });
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -9,19 +9,12 @@ namespace backend.Services
         private readonly IHubContext<MessageHub> _hubContext;
         private readonly ILogger<MessageService> _logger;
         private readonly Random _random = new();
-
-        private readonly string[] _messageTypes = { "info", "warning", "success", "error" };
         private readonly string[] _sampleMessages = {
             "Sistema funcionando normalmente",
             "Processamento de dados em andamento",
-            "Nova atualização disponível",
             "Backup realizado com sucesso",
             "Conexão com banco de dados estável",
-            "Monitoramento ativo",
-            "Cache atualizado",
-            "Logs sendo processados",
-            "Métricas coletadas",
-            "Serviço em operação"
+            "Monitoramento ativo"
         };
 
         public MessageService(IHubContext<MessageHub> hubContext, ILogger<MessageService> logger)
@@ -39,15 +32,11 @@ namespace backend.Services
                 try
                 {
                     var message = GenerateRandomMessage();
-
-                    // Envia mensagem para todos os clientes conectados
                     await _hubContext.Clients.All.SendAsync("ReceiveMessage", message, stoppingToken);
+                    _logger.LogInformation($"Mensagem enviada: {message.Body}");
 
-                    _logger.LogInformation($"Mensagem enviada: {message.Content}");
-
-                    // Aguarda entre 3 a 8 segundos antes da próxima mensagem
-                    var delay = _random.Next(3000, 8000);
-                    await Task.Delay(delay, stoppingToken);
+                    // Aguarda 5 segundos antes da próxima mensagem
+                    await Task.Delay(5000, stoppingToken);
                 }
                 catch (Exception ex)
                 {
@@ -59,13 +48,9 @@ namespace backend.Services
 
         private Message GenerateRandomMessage()
         {
-            var content = _sampleMessages[_random.Next(_sampleMessages.Length)];
-            var type = _messageTypes[_random.Next(_messageTypes.Length)];
-
             return new Message
             {
-                Content = content,
-                Type = type,
+                Body = _sampleMessages[_random.Next(_sampleMessages.Length)],
                 Timestamp = DateTime.UtcNow
             };
         }
